@@ -1,10 +1,10 @@
 # Node-RED Dashboard v1 to v2 Converter
 
-A web-based tool for converting Node-RED Dashboard v1 UI components to Dashboard v2 format. This project uses the [node-red-dashboard-2-migration](https://github.com/FlowFuse/node-red-dashboard-2-migration) library to handle the conversion.
+A web-based tool for converting Node-RED Dashboard v1 UI components to Dashboard v2 format. This project uses the official [node-red-dashboard-2-migration](https://github.com/FlowFuse/node-red-dashboard-2-migration) library to handle the conversion.
 
 ## Features
 
-- 🎨 Beautiful, modern web interface
+- 🎨 Modern web interface
 - 📋 Copy-paste conversion
 - ✨ Real-time JSON validation
 - 📤 One-click copy to clipboard

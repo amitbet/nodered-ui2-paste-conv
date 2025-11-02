@@ -154,27 +154,45 @@
       background: #45a049;
     }
 
+    .message-container {
+      min-height: 60px;
+      margin: 10px 0;
+      position: relative;
+    }
+
     .status {
       text-align: center;
       padding: 10px;
-      margin: 10px 0;
+      margin: 0;
       border-radius: 6px;
       font-weight: 500;
-      display: none;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
     }
 
     .status.success {
       background: #d4edda;
       color: #155724;
       border: 1px solid #c3e6cb;
-      display: block;
+      visibility: visible;
+      opacity: 1;
     }
 
     .status.error {
       background: #f8d7da;
       color: #721c24;
       border: 1px solid #f5c6cb;
-      display: block;
+      visibility: visible;
+      opacity: 1;
     }
 
     .info {
@@ -200,14 +218,25 @@
     }
 
     .loading {
-      display: none;
       text-align: center;
       padding: 10px;
       color: #667eea;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
     }
 
     .loading.show {
-      display: block;
+      visibility: visible;
+      opacity: 1;
     }
   </style>
 </head>
@@ -219,13 +248,15 @@
     </div>
 
     <div class="content">
-      <div class="status" id="status"></div>
-      <div class="loading" id="loading">Converting...</div>
+      <div class="message-container">
+        <div class="status" id="status"></div>
+        <div class="loading" id="loading">Converting...</div>
+      </div>
 
       <div class="grid">
         <div class="panel">
           <h2>📥 Dashboard v1 JSON (Input)</h2>
-          <textarea id="inputJson" placeholder='Paste your Dashboard v1 flow JSON here...
+          <textarea id="inputJson" placeholder='Paste your Dashboard v1 flow JSON here - conversion happens automatically!
 
 Example format:
 {
@@ -250,6 +281,9 @@ Example format:
         <button id="clearBtn" onclick="clearAll()">Clear All</button>
         <button id="copyBtn" onclick="copyOutput()">Copy Output</button>
       </div>
+      <p style="text-align: center; color: #666; margin-top: 10px; font-size: 0.9em;">
+        💡 Tip: Conversion happens automatically when you paste valid JSON or stop typing
+      </p>
 
       <div class="info">
         <h3>ℹ️ Supported Nodes</h3>
@@ -280,9 +314,8 @@ Example format:
       const loading = document.getElementById('loading');
       const convertBtn = document.getElementById('convertBtn');
 
-      // Clear previous status
-      status.className = 'status';
-      status.textContent = '';
+      // Clear previous status (keep space reserved)
+      hideStatus();
 
       if (!inputJson) {
         showStatus('Please paste Dashboard v1 JSON in the input field', 'error');
@@ -298,7 +331,8 @@ Example format:
         return;
       }
 
-      // Show loading state
+      // Show loading state, hide status
+      hideStatus();
       loading.classList.add('show');
       convertBtn.disabled = true;
 
@@ -319,12 +353,13 @@ Example format:
 
         // Display converted JSON
         outputJson.value = JSON.stringify(result.data, null, 2);
+        loading.classList.remove('show');
         showStatus('✅ Conversion successful!', 'success');
       } catch (error) {
+        loading.classList.remove('show');
         showStatus('❌ Error: ' + error.message, 'error');
         outputJson.value = '';
       } finally {
-        loading.classList.remove('show');
         convertBtn.disabled = false;
       }
     }
@@ -332,8 +367,7 @@ Example format:
     function clearAll() {
       document.getElementById('inputJson').value = '';
       document.getElementById('outputJson').value = '';
-      document.getElementById('status').className = 'status';
-      document.getElementById('status').textContent = '';
+      hideStatus();
     }
 
     function copyOutput() {
@@ -365,11 +399,69 @@ Example format:
       }
     }
 
+    function hideStatus() {
+      const status = document.getElementById('status');
+      status.className = 'status';
+      status.textContent = '';
+    }
+
     // Allow Enter+Ctrl/Cmd to convert
     document.getElementById('inputJson').addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         convertJson();
       }
+    });
+
+    // Auto-convert on paste
+    let pasteTimeout;
+    const inputTextarea = document.getElementById('inputJson');
+    
+    inputTextarea.addEventListener('paste', () => {
+      // Clear any existing timeout
+      clearTimeout(pasteTimeout);
+      
+      // Wait for paste to complete, then convert
+      pasteTimeout = setTimeout(() => {
+        const inputValue = inputTextarea.value.trim();
+        if (inputValue) {
+          // Validate if it looks like JSON before converting
+          try {
+            JSON.parse(inputValue);
+            convertJson();
+          } catch (e) {
+            // Not valid JSON yet, might be incomplete paste
+            // Try again after a longer delay
+            setTimeout(() => {
+              const retryValue = inputTextarea.value.trim();
+              if (retryValue) {
+                try {
+                  JSON.parse(retryValue);
+                  convertJson();
+                } catch (e2) {
+                  // Still not valid, user might be typing manually
+                }
+              }
+            }, 500);
+          }
+        }
+      }, 100);
+    });
+
+    // Also auto-convert on input changes (debounced) for manual typing
+    let inputTimeout;
+    inputTextarea.addEventListener('input', () => {
+      clearTimeout(inputTimeout);
+      inputTimeout = setTimeout(() => {
+        const inputValue = inputTextarea.value.trim();
+        if (inputValue) {
+          try {
+            JSON.parse(inputValue);
+            convertJson();
+          } catch (e) {
+            // Not valid JSON, don't convert
+          }
+        }
+      }, 1000); // Wait 1 second after typing stops
     });
   </script>
 </body>
