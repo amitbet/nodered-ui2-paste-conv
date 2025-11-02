@@ -2,13 +2,18 @@
 
 A web-based tool for converting Node-RED Dashboard v1 UI components to Dashboard v2 format. This project uses the official [node-red-dashboard-2-migration](https://github.com/FlowFuse/node-red-dashboard-2-migration) library to handle the conversion.
 
+Available as:
+- 🌐 **Web application** (run locally)
+- 💻 **Electron desktop app** (Mac & Windows installers)
+
 ## Features
 
 - 🎨 Modern web interface
-- 📋 Copy-paste conversion
+- 📋 Copy-paste conversion (automatic on paste)
 - ✨ Real-time JSON validation
 - 📤 One-click copy to clipboard
 - 📱 Responsive design
+- 💻 Standalone desktop application (Electron)
 
 ## Supported Nodes
 
@@ -43,7 +48,22 @@ npm install
 
 ## Usage
 
-### Quick Start (Recommended)
+### Option 1: Desktop App (Electron) - Recommended
+
+**Download the installer:**
+- macOS: Download `.dmg` file from releases
+- Windows: Download `.exe` installer from releases
+
+**Or build from source:**
+```bash
+npm install
+npm run build        # Build for your platform
+npm run build:all     # Build for both Mac and Windows
+```
+
+See `ELECTRON_BUILD.md` for detailed build instructions.
+
+### Option 2: Web Application
 
 **On macOS/Linux:**
 ```bash
